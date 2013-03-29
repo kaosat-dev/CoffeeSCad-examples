@@ -12,6 +12,5 @@ assembly.add(otherCube)
 
 log.level = log.DEBUG
 log.info(cube.position)
-#log.info(otherCube.position)
 
 
