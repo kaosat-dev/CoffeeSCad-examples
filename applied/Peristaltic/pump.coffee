@@ -6,7 +6,7 @@
 class Pump extends Part
   constructor:(options)->
     @defaults = {
-      lobes: 3,
+      lobes: 5,
       pipe_od: 5,
       pipe_id: 4,
       pump_radius:50,
@@ -25,7 +25,7 @@ class Pump extends Part
     }
     options = @injectOptions(@defaults,options)
     super options
-    
+    # layout 1 shows assembly 0 make a single part for printing
     if @layout
       # the base and shroud
       b = new Base_assembly(options)
@@ -52,9 +52,30 @@ class Pump extends Part
       @add(b)
       @add(ra)
       @add(co)
-    else
       
- 
+    else
+      @explode = 0
+      # all the individual parts
+      ba = new Base(options)
+      lr = new Lower_rotor(options)
+      ur = new Upper_rotor(options)
+      co = new Coupling(options)
+      rp = new Roller_print(options)
+      # place them 
+      ba.translate([-@wall_thickness,-@wall_thickness,0])
+      co.translate([-@wall_thickness,-@wall_thickness,0])
+      lr.translate([0,@pump_radius+@clearance,0])
+      ur.translate([@pump_radius+@clearance,0,0])
+      rp.translate([@pump_radius+@clearance,@pump_radius+@clearance,0])
+      #add them all together
+      @union(ba)
+      @union(lr)
+      @union(ur)
+      @union(co)
+      @union(rp)
+      @color([0.5,0.5,0.5])
+      # move the lot
+      @translate([-@pump_radius/2,-@pump_radius/2,0])
  
  # Base assembly
  class Base_assembly extends Part
@@ -149,7 +170,7 @@ class Pump extends Part
    @add(flat_pipe)
  
     
- # the upper section of the base and the tuber guides
+ # the upper section of the base and the tube guides
  class Shroud extends Part
   constructor:(options)->
     @defaults = {
@@ -230,7 +251,7 @@ class Pump extends Part
     upr.translate([0,0,2*@rotor_thickness*@explode])
     @add(upr)
 
-# base class for the split router 
+# base class for the split rotor 
 class Half_rotor extends Part
   constructor:(options)->
     @defaults = {rotor_radius: 20,height: 30}
@@ -297,7 +318,7 @@ class Upper_rotor extends Part
     rotor.subtract(co)
     @union(rotor)
     
- class Coupling extends Part
+class Coupling extends Part
   constructor:(options)->
     @defaults = {
       bot_rad:8,
@@ -324,7 +345,7 @@ class Upper_rotor extends Part
     
     @union(coup)
 
- class Nut extends Part
+class Nut extends Part
   constructor:(options)->
     @defaults = {m:3}
     options = @injectOptions(@defaults,options)
@@ -375,3 +396,18 @@ class Roller extends Part
     o.subtract(i)
     o.color([0.4,0.4,0.4])
     @union(o)
+
+# lay out the rollers for printing
+class Roller_print extends Part
+  constructor:(options)->
+    @defaults = {spacing:3
+    }
+    options = @injectOptions(@defaults,options)
+    super options
+    for i in [0..@lobes]
+      r = new Roller(options)
+      r.translate([@roller_outer+2*@clearance,0,0])
+      r.rotate([0,0,(360/@lobes)*i])
+      @union(r)
+
+      
