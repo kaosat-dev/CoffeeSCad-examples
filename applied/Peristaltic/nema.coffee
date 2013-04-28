@@ -20,7 +20,7 @@ class NemaMotor extends Part
       mountingholes_radius : 1.5,
       mountingholes_depth : 4.5
     }
-    options = @injectOptions(options, @defaults)
+    options = @injectOptions(@defaults,options)
     super options
     
     shaftsub = new Cube(
